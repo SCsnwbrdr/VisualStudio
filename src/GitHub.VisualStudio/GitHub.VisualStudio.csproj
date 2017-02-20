@@ -416,6 +416,9 @@
       <CustomToolNamespace>GitHub.VisualStudio.Settings</CustomToolNamespace>
       <LastGenOutput>PackageSettingsGen.cs</LastGenOutput>
     </Content>
+    <Content Include="GitHub.CodeBases.pkgdef">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
