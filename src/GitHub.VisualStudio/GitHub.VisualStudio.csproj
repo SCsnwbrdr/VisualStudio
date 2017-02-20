@@ -292,6 +292,7 @@
     <Compile Include="..\common\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="BindingRedirections.cs" />
     <Compile Include="Helpers\VisualTreeExtensions.cs" />
     <Compile Include="IServiceProviderPackage.cs" />
     <Compile Include="Menus\MenuBase.cs" />
@@ -415,9 +416,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <CustomToolNamespace>GitHub.VisualStudio.Settings</CustomToolNamespace>
       <LastGenOutput>PackageSettingsGen.cs</LastGenOutput>
-    </Content>
-    <Content Include="GitHub.CodeBases.pkgdef">
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="app.config" />
     <None Include="packages.config">
