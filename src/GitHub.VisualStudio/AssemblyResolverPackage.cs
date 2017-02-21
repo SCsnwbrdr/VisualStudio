@@ -12,24 +12,12 @@ namespace GitHub.VisualStudio
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
     public class AssemblyResolverPackage : ExtensionPointPackage
     {
-        // list of assembly names that should always be loaded from extension dir
+        // list of assemblies that should be resolved by name only
         static readonly string[] ourAssemblies =
         {
-            "GitHub.Api",
-            "GitHub.App",
-            "GitHub.CredentialManagement",
             "GitHub.Exports",
             "GitHub.Exports.Reactive",
-            "GitHub.Extensions",
-            "GitHub.Extensions.Reactive",
-            "GitHub.UI",
-            "GitHub.UI.Reactive",
-            "GitHub.VisualStudio",
-            "GitHub.TeamFoundation",
-            "GitHub.TeamFoundation.14",
-            "GitHub.TeamFoundation.15",
             "GitHub.VisualStudio.UI",
-            "System.Windows.Interactivity"
         };
 
         readonly string extensionDir;
@@ -71,6 +59,7 @@ namespace GitHub.VisualStudio
                     // Resolve any version of our assemblies.
                     if (!ourAssemblies.Contains(name, StringComparer.OrdinalIgnoreCase))
                     {
+                        Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Not resolving '{0}' to '{1}'.", e.Name, targetName.FullName));
                         return null;
                     }
 
