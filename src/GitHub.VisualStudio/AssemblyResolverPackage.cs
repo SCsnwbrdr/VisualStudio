@@ -1,22 +1,16 @@
-﻿using GitHub.VisualStudio;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
-using System.Diagnostics;
-using GitHub.Collections;
 
-namespace GitHub.Helpers
+namespace GitHub.VisualStudio
 {
-    public static class AssemblyResolver
+    [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
+    public class AssemblyResolverPackage : ExtensionPointPackage
     {
-        static bool resolverInitialized;
-
         // list of assemblies to be loaded from the extension installation path
         static readonly string[] ourAssemblies =
         {
@@ -37,12 +31,16 @@ namespace GitHub.Helpers
             "System.Windows.Interactivity"
         };
 
-        public static void InitializeAssemblyResolver()
+        protected override void Initialize()
         {
-            if (resolverInitialized)
-                return;
             AppDomain.CurrentDomain.AssemblyResolve += LoadAssemblyFromRunDir;
-            resolverInitialized = true;
+            base.Initialize();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            AppDomain.CurrentDomain.AssemblyResolve -= LoadAssemblyFromRunDir;
+            base.Dispose(disposing);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods")]
@@ -54,6 +52,7 @@ namespace GitHub.Helpers
                 var name = new AssemblyName(requestedName).Name;
                 if (!ourAssemblies.Contains(name, StringComparer.OrdinalIgnoreCase))
                     return null;
+
                 var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 var filename = Path.Combine(path, name + ".dll");
                 if (!File.Exists(filename))
