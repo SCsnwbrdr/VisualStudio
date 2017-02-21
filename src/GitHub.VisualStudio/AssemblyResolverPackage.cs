@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
+using System.Globalization;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
+using System.Linq;
 
 namespace GitHub.VisualStudio
 {
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
     public class AssemblyResolverPackage : ExtensionPointPackage
     {
-        // list of assemblies to be loaded from the extension installation path
+        // list of assembly names that should always be loaded from extension dir
         static readonly string[] ourAssemblies =
         {
             "GitHub.Api",
@@ -31,33 +32,52 @@ namespace GitHub.VisualStudio
             "System.Windows.Interactivity"
         };
 
+        readonly string extensionDir;
+
+        public AssemblyResolverPackage()
+        {
+            extensionDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
         protected override void Initialize()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += LoadAssemblyFromRunDir;
+            AppDomain.CurrentDomain.AssemblyResolve += LoadAssemblyFromExtensionDir;
             base.Initialize();
         }
 
         protected override void Dispose(bool disposing)
         {
-            AppDomain.CurrentDomain.AssemblyResolve -= LoadAssemblyFromRunDir;
+            AppDomain.CurrentDomain.AssemblyResolve -= LoadAssemblyFromExtensionDir;
             base.Dispose(disposing);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods")]
-        static Assembly LoadAssemblyFromRunDir(object sender, ResolveEventArgs e)
+        Assembly LoadAssemblyFromExtensionDir(object sender, ResolveEventArgs e)
         {
             try
             {
-                var requestedName = e.Name.TrimSuffix(".dll", StringComparison.OrdinalIgnoreCase);
-                var name = new AssemblyName(requestedName).Name;
-                if (!ourAssemblies.Contains(name, StringComparer.OrdinalIgnoreCase))
-                    return null;
-
-                var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                var filename = Path.Combine(path, name + ".dll");
+                var name = new AssemblyName(e.Name).Name;
+                var filename = Path.Combine(extensionDir, name + ".dll");
                 if (!File.Exists(filename))
+                {
                     return null;
+                }
 
+                var targetName = AssemblyName.GetAssemblyName(filename);
+
+                // Resolve any exact `FullName` matches.
+                if (e.Name != targetName.FullName)
+                {
+                    // Resolve any version of our assemblies.
+                    if (!ourAssemblies.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        return null;
+                    }
+
+                    Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Resolving '{0}' to '{1}'.", e.Name, targetName.FullName));
+                }
+
+                Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Loading '{0}' from '{1}'.", targetName.FullName, filename));
                 return Assembly.LoadFrom(filename);
             }
             catch (Exception ex)
@@ -69,8 +89,10 @@ namespace GitHub.VisualStudio
                     Environment.NewLine,
                     ex,
                     Environment.NewLine);
+                Trace.WriteLine(log);
                 VsOutputLogger.Write(log);
             }
+
             return null;
         }
     }
