@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Use this package to resolve assemblies to the `LoadFrom` context.
+// Use `ProvideCodeBases.cs` to resolve assemblies to the `Load` context.
+// Only one needs to be active (there are pros and cons with each).
+
+/*
+using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
@@ -15,8 +20,6 @@ namespace GitHub.VisualStudio
         // list of assemblies that should be resolved by name only
         static readonly string[] ourAssemblies =
         {
-            "GitHub.Exports",
-            "GitHub.Exports.Reactive",
             "GitHub.VisualStudio.UI",
         };
 
@@ -86,3 +89,4 @@ namespace GitHub.VisualStudio
         }
     }
 }
+*/
