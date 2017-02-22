@@ -1,9 +1,4 @@
-﻿// Use this package to resolve assemblies to the `LoadFrom` context.
-// Use `ProvideCodeBases.cs` to resolve assemblies to the `Load` context.
-// Only one needs to be active (there are pros and cons with each).
-
-/*
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
@@ -14,13 +9,17 @@ using System.Linq;
 
 namespace GitHub.VisualStudio
 {
+    // this is the Git service GUID, so we load whenever it loads
+    [ProvideAutoLoad(Guids.GitSccProviderId)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
     public class AssemblyResolverPackage : ExtensionPointPackage
     {
         // list of assemblies that should be resolved by name only
         static readonly string[] ourAssemblies =
         {
+            "GitHub.UI",
             "GitHub.VisualStudio.UI",
+            "System.Windows.Interactivity"
         };
 
         readonly string extensionDir;
@@ -32,6 +31,7 @@ namespace GitHub.VisualStudio
 
         protected override void Initialize()
         {
+            Trace.WriteLine("GitHub.VisualStudio.AssemblyResolverPackage.Initialize()");
             AppDomain.CurrentDomain.AssemblyResolve += LoadAssemblyFromExtensionDir;
             base.Initialize();
         }
@@ -89,4 +89,3 @@ namespace GitHub.VisualStudio
         }
     }
 }
-*/
