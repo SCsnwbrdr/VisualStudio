@@ -9,10 +9,12 @@ using System.Linq;
 
 namespace GitHub.VisualStudio
 {
-    // this is the Git service GUID, so we load whenever it loads
+    // This is the Git service GUID, which fires early and is used by GitHubService.
     [ProvideAutoLoad(Guids.GitSccProviderId)]
-    [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string)]
-    public class AssemblyResolverPackage : ExtensionPointPackage
+
+    // This fires before ShellInitialized and SolutionExists.
+    [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string)]
+    public class AssemblyResolverPackage : Package
     {
         // list of assemblies that should be resolved by name only
         static readonly string[] ourAssemblies =
@@ -26,14 +28,9 @@ namespace GitHub.VisualStudio
 
         public AssemblyResolverPackage()
         {
+            Debug.WriteLine("GitHub assembly resolver is now active.");
             extensionDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        }
-
-        protected override void Initialize()
-        {
-            Trace.WriteLine("GitHub.VisualStudio.AssemblyResolverPackage.Initialize()");
             AppDomain.CurrentDomain.AssemblyResolve += LoadAssemblyFromExtensionDir;
-            base.Initialize();
         }
 
         protected override void Dispose(bool disposing)
